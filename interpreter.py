@@ -108,7 +108,7 @@ if __name__ == '__main__':
                 print("\n---Goodbye!---\n ")
                 break
             if not text:
-                continue
+                continue 
             lexer = Lexer(text)
             parser = Parser(lexer)
             statements = parser.parse()
