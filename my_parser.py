@@ -119,10 +119,10 @@ class Parser:
         self.error(f'Unexpected token {token.type}')
 
 
-# Example usage:
-if __name__ == '__main__':
-     from lexer import Lexer
-     text = input('Enter expression: ')
-     parser = Parser(Lexer(text))
-     ast = parser.parse()
-     print(ast)
+# Example usage
+#if __name__ == '__main__':
+#     from lexer import Lexer
+#     text = input('Enter expression: ')
+#     parser = Parser(Lexer(text))
+#     ast = parser.parse()
+#     print(ast)
