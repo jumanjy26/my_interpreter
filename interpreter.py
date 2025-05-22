@@ -1,48 +1,45 @@
-from parser import Parser
+from my_parser import Parser
 from lexer import Lexer
 
 class Interpreter:
-    def visit(self, node):                  # dispatcher method
+    def visit(self, node):
         method_name = 'visit_' + type(node).__name__
         visitor = getattr(self, method_name, None)
-        
-        if not visitor:
+        if visitor is None:
             raise Exception(f'No visit_{type(node).__name__} method')
         return visitor(node)
-    
-    def visit_BinOp(self, node):                #binary operations (+, -, *, /)
+
+    def visit_BinOp(self, node):
         if node.op.type == 'PLUS':
             return self.visit(node.left) + self.visit(node.right)
-        if node.op.type == 'MINUS':
+        elif node.op.type == 'MINUS':
             return self.visit(node.left) - self.visit(node.right)
-        if node.op.type == 'STAR':
+        elif node.op.type == 'STAR':
             return self.visit(node.left) * self.visit(node.right)
-        if node.op.type == 'SLASH':
+        elif node.op.type == 'SLASH':
             return self.visit(node.left) / self.visit(node.right)
-        raise Exception(f'Unknown operator {node.op.type}')
-    
-    def visit_Num(self, node):      ## return its stored numeric value
+        else:
+            raise Exception(f'Unknown operator {node.op.type}')
+
+    def visit_Num(self, node):
         return node.value
 
 if __name__ == '__main__':
     interpreter = Interpreter()
-    print("Basic Calculator. Type 'exit' or 'quit' to leave.")
+    print("Basic Calculator.")
+    print("Type 'exit' or 'quit' to leave.")
     while True:
+        text = input("> ").strip()
+        if text.lower() in ("exit", "quit"):
+            print("Goodbye!")
+            break
+        if not text:
+            continue
         try:
-            text = input('> ').strip()
-
-            # handle empty input or quit commands
-            if not text or text.lower() in ('exit', 'quit'):
-                print("Goodbye!")
-                break
-
-            # run lexer, parser, interpreter
-            lexer  = Lexer(text)
+            lexer = Lexer(text)
             parser = Parser(lexer)
-            ast    = parser.expr()
+            ast = parser.expr()
             result = interpreter.visit(ast)
             print(result)
-
         except Exception as e:
-            # catch any errors (invalid char, parse error, div by zero, etc)
             print(f"Error: {e}. Try again or type 'exit'.")
