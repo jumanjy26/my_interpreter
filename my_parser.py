@@ -1,76 +1,128 @@
-from lexer import Lexer, Token
+from lexer import Lexer
 
-class AST:                      #a base “marker” class for all our AST nodes.
-    pass
-
-class BinOp(AST):               #represents a binary operation (like left + right).
-    def __init__(self, left, op, right):
-        self.left = left            ##for ATS node, left
-        self.token = self.op = op   #token -a PLUS or STAR.
-        self.right = right          #for ATS node, right 
-        self.right = right          #for ATS node, right
-
-class Num(AST):                     #number literal.
+# AST node classes
+class Num:
     def __init__(self, token):
-        self.token = token
         self.value = token.value
 
+class Bool:
+    def __init__(self, token):
+        self.value = token.value
+
+class BinOp:
+    def __init__(self, left, op, right):
+        self.left = left
+        self.op = op
+        self.right = right
+
+class UnaryOp:
+    def __init__(self, op, expr):
+        self.op = op
+        self.expr = expr
+
 class Parser:
-    def __init__(self, lexer):
+    def __init__(self, lexer: Lexer):
         self.lexer = lexer
         self.current_token = self.lexer.get_next_token()
 
-    def error(self):
-        raise Exception('Invalid syntax')
+    def error(self, msg='Invalid syntax'):
+        raise Exception(msg)
 
-    def eat(self, token_type):        # enforces that the next token must be of the indicated type.
+    def eat(self, token_type: str):
         if self.current_token.type == token_type:
             self.current_token = self.lexer.get_next_token()
         else:
-            self.error()              # otherwise we throw a syntax error.
+            self.error(f'Expected token {token_type}, got {self.current_token.type}')
 
-    def factor(self):                 # bare number, which becomes a Num(token)
+    def parse(self):
+        """Entry point: parse a full expression and ensure we've consumed all tokens."""
+        node = self.parse_or()
+        if self.current_token.type != 'EOF':
+            self.error('Unexpected token after expression')
+        return node
+
+    # Lowest-precedence: OR
+    def parse_or(self):
+        node = self.parse_and()
+        while self.current_token.type == 'OR':
+            op = self.current_token
+            self.eat('OR')
+            node = BinOp(node, op, self.parse_and())
+        return node
+
+    # Next: AND
+    def parse_and(self):
+        node = self.parse_not()
+        while self.current_token.type == 'AND':
+            op = self.current_token
+            self.eat('AND')
+            node = BinOp(node, op, self.parse_not())
+        return node
+
+    # Next: NOT (unary)
+    def parse_not(self):
+        if self.current_token.type == 'NOT':
+            op = self.current_token
+            self.eat('NOT')
+            return UnaryOp(op, self.parse_not())
+        return self.parse_comparison()
+
+    # Comparisons: ==, !=, <, <=, >, >=
+    def parse_comparison(self):
+        node = self.parse_arith()
+        if self.current_token.type in ('EQ', 'NE', 'LT', 'LTE', 'GT', 'GTE'):
+            op = self.current_token
+            self.eat(op.type)
+            node = BinOp(node, op, self.parse_arith())
+        return node
+
+    # Arithmetic addition/subtraction
+    def parse_arith(self):
+        node = self.parse_term()
+        while self.current_token.type in ('PLUS', 'MINUS'):
+            op = self.current_token
+            self.eat(op.type)
+            node = BinOp(node, op, self.parse_term())
+        return node
+
+    # Arithmetic multiplication/division
+    def parse_term(self):
+        node = self.parse_factor()
+        while self.current_token.type in ('STAR', 'SLASH'):
+            op = self.current_token
+            self.eat(op.type)
+            node = BinOp(node, op, self.parse_factor())
+        return node
+
+    # Unary +, -, numbers, booleans, and parenthesised expressions
+    def parse_factor(self):
         token = self.current_token
-        if token.type == 'NUMBER':
-            self.eat('NUMBER')
+
+        if token.type in ('PLUS', 'MINUS'):
+            self.eat(token.type)
+            return UnaryOp(token, self.parse_factor())
+
+        if token.type in ('INT', 'FLOAT'):
+            self.eat(token.type)
             return Num(token)
-        elif token.type == 'LPAREN':
+
+        if token.type == 'BOOLEAN':
+            self.eat('BOOLEAN')
+            return Bool(token)
+
+        if token.type == 'LPAREN':
             self.eat('LPAREN')
-            node = self.expr()
+            node = self.parse_or()
             self.eat('RPAREN')
             return node
 
-    def term(self):                 # handles * and /, which bind more tightly than + and –.
-        node = self.factor()
+        self.error(f'Unexpected token {token.type}')
 
-        while self.current_token.type in ('STAR', 'SLASH'):
-            token = self.current_token
-            if token.type == 'STAR':
-                self.eat('STAR')
-            elif token.type == 'SLASH':
-                self.eat('SLASH')
 
-            node = BinOp(left=node, op=token, right=self.factor())
-
-        return node             # returns a subtree that groups all the *// operation
-
-    def expr(self):
-        node = self.term()
-
-        while self.current_token.type in ('PLUS', 'MINUS'):
-            token = self.current_token
-            if token.type == 'PLUS':
-                self.eat('PLUS')
-            elif token.type == 'MINUS':
-                self.eat('MINUS')
-
-            node = BinOp(left=node, op=token, right=self.term())
-
-        return node
-
+# Example usage:
 if __name__ == '__main__':
-    text = input('Enter expression: ')
-    lexer = Lexer(text)
-    parser = Parser(lexer)
-    ast = parser.expr()
-    print(ast)
+     from lexer import Lexer
+     text = input('Enter expression: ')
+     parser = Parser(Lexer(text))
+     ast = parser.parse()
+     print(ast)
