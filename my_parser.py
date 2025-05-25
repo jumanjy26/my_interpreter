@@ -1,4 +1,9 @@
+# my_parser.py
+# Parses tokens into an Abstract Syntax Tree (AST) for interpretation.
+
 from lexer import Lexer
+
+# AST node classes
 
 class Num:
     def __init__(self, token):
@@ -14,27 +19,44 @@ class String:
 
 class BinOp:
     def __init__(self, left, op, right):
-        self.left = left
-        self.op = op
-        self.right = right
+        self.left = left        # Left side expression node
+        self.op = op            # Operator token
+        self.right = right      # Right side expression node
 
 class UnaryOp:
     def __init__(self, op, expr):
-        self.op = op
-        self.expr = expr
+        self.op = op            # Unary operator token
+        self.expr = expr        # Expression node it operates on
 
 class VarAssign:
     def __init__(self, name, value):
-        self.name = name
-        self.value = value
+        self.name = name        # Variable name (string)
+        self.value = value      # Expression node assigned to variable
 
 class VarAccess:
     def __init__(self, name):
-        self.name = name
+        self.name = name        # Variable name (string)
 
 class PrintStmt:
     def __init__(self, expr):
-        self.expr = expr
+        self.expr = expr        # Expression to print
+
+class IfStmt:
+    def __init__(self, condition, true_block, false_block=None):
+        self.condition = condition      # Expression node for if condition
+        self.true_block = true_block    # List of statements if true
+        self.false_block = false_block  # List of statements if false (optional)
+
+class WhileStmt:
+    def __init__(self, condition, body):
+        self.condition = condition  # Expression node for loop condition
+        self.body = body            # List of statements inside the loop
+
+class InputExpr:
+    def __init__(self):
+        pass                        # Represents input() call (no children)
+
+# Parser class using recursive descent parsing
 
 class Parser:
     def __init__(self, lexer: Lexer):
@@ -45,27 +67,65 @@ class Parser:
         raise Exception(msg)
 
     def eat(self, token_type: str):
+        # Consume the current token if it matches expected type, else error
         if self.current_token.type == token_type:
             self.current_token = self.lexer.get_next_token()
         else:
             self.error(f'Expected token {token_type}, got {self.current_token.type}')
 
     def parse(self):
+        # Parse a sequence of statements until EOF
         statements = []
         while self.current_token.type != 'EOF':
             stmt = self.parse_statement()
             statements.append(stmt)
         return statements
 
+    def parse_block(self):
+        # Parse a block of statements enclosed in { ... }
+        self.eat('LBRACE')
+        statements = []
+        while self.current_token.type != 'RBRACE':
+            statements.append(self.parse_statement())
+        self.eat('RBRACE')
+        return statements
+
     def parse_statement(self):
+        # Determine statement type and parse accordingly
         if self.current_token.type == 'PRINT':
             self.eat('PRINT')
             expr = self.parse_or()
             if self.current_token.type == 'SEMI':
                 self.eat('SEMI')
             return PrintStmt(expr)
-        
-        if self.current_token.type == 'IDENTIFIER':
+
+        elif self.current_token.type == 'IF':
+            self.eat('IF')
+            self.eat('LPAREN')
+            condition = self.parse_or()
+            self.eat('RPAREN')
+            true_block = self.parse_block()
+            false_block = None
+            if self.current_token.type == 'ELSE':
+                self.eat('ELSE')
+                false_block = self.parse_block()
+            return IfStmt(condition, true_block, false_block)
+
+        elif self.current_token.type == 'WHILE':
+            self.eat('WHILE')
+            self.eat('LPAREN')
+            condition = self.parse_or()
+            self.eat('RPAREN')
+            body = self.parse_block()
+            return WhileStmt(condition, body)
+
+        elif self.current_token.type == 'INPUT':
+            self.eat('INPUT')
+            self.eat('LPAREN')
+            self.eat('RPAREN')
+            return InputExpr()
+
+        elif self.current_token.type == 'IDENTIFIER':
             var_name = self.current_token.value
             self.eat('IDENTIFIER')
             if self.current_token.type == 'ASSIGN':
@@ -76,11 +136,14 @@ class Parser:
                 return VarAssign(var_name, expr)
             else:
                 return VarAccess(var_name)
-        
-        expr = self.parse_or()
-        if self.current_token.type == 'SEMI':
-            self.eat('SEMI')
-        return expr
+
+        else:
+            expr = self.parse_or()
+            if self.current_token.type == 'SEMI':
+                self.eat('SEMI')
+            return expr
+
+    # Parsing expressions by precedence levels
 
     def parse_or(self):
         node = self.parse_and()
@@ -148,6 +211,12 @@ class Parser:
             self.eat('STRING')
             return String(token)
 
+        if token.type == 'INPUT':   # <-- This is the fix added here
+            self.eat('INPUT')
+            self.eat('LPAREN')
+            self.eat('RPAREN')
+            return InputExpr()
+
         if token.type == 'IDENTIFIER':
             var_name = token.value
             self.eat('IDENTIFIER')
@@ -160,3 +229,18 @@ class Parser:
             return node
 
         self.error(f'Unexpected token {token.type}')
+
+
+if __name__ == '__main__':
+    from lexer import Lexer
+    while True:
+        try:
+            text = input("Enter expression (or 'exit' to quit): ")
+            if text.strip().lower() in ('exit', 'quit'):
+                print("Goodbye!")
+                break
+            parser = Parser(Lexer(text))
+            ast = parser.parse()
+            print("Parsed AST:", ast)
+        except Exception as e:
+            print(f"Error: {e}")

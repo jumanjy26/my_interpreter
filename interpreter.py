@@ -1,10 +1,19 @@
 from lexer import Lexer
 from my_parser import Parser
-from my_parser import Num, Bool, BinOp, UnaryOp, String, VarAssign, VarAccess, PrintStmt
-from lexer import TT_PLUS, TT_MINUS, TT_MUL, TT_DIV, TT_EQ, TT_NE, TT_LT, TT_LTE, TT_GT, TT_GTE, TT_AND, TT_OR, TT_NOT
+from my_parser import (
+    Num, Bool, BinOp, UnaryOp, String,
+    VarAssign, VarAccess, PrintStmt,
+    IfStmt, WhileStmt, InputExpr
+)
+from lexer import (
+    TT_PLUS, TT_MINUS, TT_MUL, TT_DIV,
+    TT_EQ, TT_NE, TT_LT, TT_LTE,
+    TT_GT, TT_GTE, TT_AND, TT_OR, TT_NOT
+)
 
 class Interpreter:
     def __init__(self):
+        # Global variable storage
         self.global_vars = {}
 
     def visit(self, node):
@@ -32,12 +41,29 @@ class Interpreter:
     def visit_VarAssign(self, node):
         value = self.visit(node.value)
         self.global_vars[node.name] = value
-        return value        
+        return value
 
     def visit_PrintStmt(self, node):
         value = self.visit(node.expr)
-        print(value)        # print output directly
-        return None        # explicitly return None to avoid carry-over
+        print(value)
+        return None  # print statements return nothing
+
+    def visit_IfStmt(self, node):
+        condition = self.visit(node.condition)
+        if condition:
+            for stmt in node.true_block:
+                self.visit(stmt)
+        elif node.false_block is not None:
+            for stmt in node.false_block:
+                self.visit(stmt)
+
+    def visit_WhileStmt(self, node):
+        while self.visit(node.condition):
+            for stmt in node.body:
+                self.visit(stmt)
+
+    def visit_InputExpr(self, node):
+        return input()
 
     def visit_BinOp(self, node):
         left = self.visit(node.left)
@@ -95,20 +121,20 @@ class Interpreter:
             if val is not None:
                 result = val
         if result is not None:
-            print(result)   # Print the last expression result if not None
+            print(result)
         return result
 
 if __name__ == '__main__':
     interpreter = Interpreter()
-    print("Stage 4 Interpreter - supports variables and print\n---Type exit or quit to leave---\n")
+    print("Stage 5 Interpreter - supports full language features")
     while True:
         try:
             text = input('> ').strip()
             if text.lower() in ('exit', 'quit'):
-                print("\n---Goodbye!---\n ")
+                print("\nGoodbye!")
                 break
             if not text:
-                continue 
+                continue
             lexer = Lexer(text)
             parser = Parser(lexer)
             statements = parser.parse()

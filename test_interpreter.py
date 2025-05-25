@@ -2,53 +2,82 @@ from lexer import Lexer
 from my_parser import Parser
 from interpreter import Interpreter
 
-def test_interpreter():
-    print("Running Stage 2 and 3 tests...")
-    interpreter = Interpreter()
+def test_stage_1_to_3(interpreter):
+    print("Testing Stage 1-3 features (arithmetic, booleans, strings)...")
     test_cases = [
-        # Stage 2 interpreter tests
+        "3 + 4",
+        "10 - 2 * 3",
+        "(5 + 6) * 2",
         "true and false",
-        "5 + 3 * 2",
-        "(10 / 2) == 5",
         "not false or true",
-
-        # Stage 3 interpreter tests with strings
-        '"hello"',
-        '"foo" + "bar"',
-        '"\nrepeat " * 3',
-        '"number " + 123',
+        '"hello" + " world"',
+        '"repeat" * 3',
+        '"foo" + 123',
     ]
-
     for expr in test_cases:
         lexer = Lexer(expr)
         parser = Parser(lexer)
         ast = parser.parse()
-        # ast might be list or single node
-        if isinstance(ast, list):
-            for node in ast:
-                result = interpreter.visit(node)
-        else:
-            result = interpreter.visit(ast)
-        print(f'Expression: {expr}')
-        print('Result:', result)
-        print('---')
+        # parser returns a list, interpret each node
+        for node in ast:
+            result = interpreter.visit(node)
+        print(f"Expression: {expr}")
+        print(f"Result: {result}")
+        print("---")
 
-def test_interpreter_stage4():
-    print("Running Stage 4 tests...")
-    interpreter = Interpreter()  # single interpreter instance to preserve variables
+def test_stage_4(interpreter):
+    print("Testing Stage 4 features (variables, assignment, print)...")
     program = """
-    x = 5 + 3;
-    y = "hello" + " world";
+    x = 10 + 5;
+    y = "hello ";
+    z = y + "world";
     print x;
-    print y;
-    z = x * 2;
     print z;
+    w = x * 2;
+    print w;
     """
     lexer = Lexer(program)
     parser = Parser(lexer)
     ast = parser.parse()
     interpreter.interpret(ast)
 
+def test_stage_5(interpreter):
+    print("Testing Stage 5 features (control flow and input)...")
+
+    # Input simulation: override input() in interpreter temporarily
+    inputs = iter(["Alice"])  # simulate user input
+
+    original_input = __builtins__.input
+    __builtins__.input = lambda: next(inputs)
+
+    program = """
+    x = 2;
+    while (x > 0) {
+        print x;
+        x = x - 1;
+    }
+    if (x == 0) {
+        print "Blast off!";
+    } else {
+        print "Counting down...";
+    }
+    print "Enter your name:";
+    name = input();
+    print "Hello, " + name;
+    """
+
+    try:
+        lexer = Lexer(program)
+        parser = Parser(lexer)
+        ast = parser.parse()
+        interpreter.interpret(ast)
+    finally:
+        __builtins__.input = original_input  # restore input
+
 if __name__ == '__main__':
-    test_interpreter()
-    test_interpreter_stage4()
+    interpreter = Interpreter()
+    test_stage_1_to_3(interpreter)
+    print("\n")
+    test_stage_4(interpreter)
+    print("\n")
+    test_stage_5(interpreter)
