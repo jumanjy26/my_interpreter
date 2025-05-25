@@ -16,7 +16,7 @@ def test_interpreter():
         # Stage 3 interpreter tests with strings
         '"hello"',
         '"foo" + "bar"',
-        '"repeat" * 3',
+        '"\nrepeat" * 3',
         '"number " + 123',
     ]
 
