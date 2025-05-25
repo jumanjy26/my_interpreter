@@ -1,30 +1,40 @@
-# my_parser.py
-
 from lexer import Lexer
 
-# AST node classes representing parts of the expression tree
 class Num:
     def __init__(self, token):
-        self.value = token.value  # Numeric value
+        self.value = token.value
 
 class Bool:
     def __init__(self, token):
-        self.value = token.value  # Boolean value (True/False)
+        self.value = token.value
 
 class String:
     def __init__(self, token):
-        self.value = token.value  # String literal value
+        self.value = token.value
 
 class BinOp:
     def __init__(self, left, op, right):
-        self.left = left          # Left operand node
-        self.op = op              # Operator token (e.g., PLUS)
-        self.right = right        # Right operand node
+        self.left = left
+        self.op = op
+        self.right = right
 
 class UnaryOp:
     def __init__(self, op, expr):
-        self.op = op              # Operator token (e.g., MINUS, NOT)
-        self.expr = expr          # Operand expression node
+        self.op = op
+        self.expr = expr
+
+class VarAssign:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+class VarAccess:
+    def __init__(self, name):
+        self.name = name
+
+class PrintStmt:
+    def __init__(self, expr):
+        self.expr = expr
 
 class Parser:
     def __init__(self, lexer: Lexer):
@@ -35,21 +45,44 @@ class Parser:
         raise Exception(msg)
 
     def eat(self, token_type: str):
-        # Consume the current token if it matches expected type; else error
         if self.current_token.type == token_type:
             self.current_token = self.lexer.get_next_token()
         else:
             self.error(f'Expected token {token_type}, got {self.current_token.type}')
 
     def parse(self):
-        # Entry point: parse a full expression and ensure no extra tokens remain
-        node = self.parse_or()
-        if self.current_token.type != 'EOF':
-            self.error('Unexpected token after expression')
-        return node
+        statements = []
+        while self.current_token.type != 'EOF':
+            stmt = self.parse_statement()
+            statements.append(stmt)
+        return statements
+
+    def parse_statement(self):
+        if self.current_token.type == 'PRINT':
+            self.eat('PRINT')
+            expr = self.parse_or()
+            if self.current_token.type == 'SEMI':
+                self.eat('SEMI')
+            return PrintStmt(expr)
+        
+        if self.current_token.type == 'IDENTIFIER':
+            var_name = self.current_token.value
+            self.eat('IDENTIFIER')
+            if self.current_token.type == 'ASSIGN':
+                self.eat('ASSIGN')
+                expr = self.parse_or()
+                if self.current_token.type == 'SEMI':
+                    self.eat('SEMI')
+                return VarAssign(var_name, expr)
+            else:
+                return VarAccess(var_name)
+        
+        expr = self.parse_or()
+        if self.current_token.type == 'SEMI':
+            self.eat('SEMI')
+        return expr
 
     def parse_or(self):
-        # Parse logical OR expressions (lowest precedence)
         node = self.parse_and()
         while self.current_token.type == 'OR':
             op = self.current_token
@@ -58,7 +91,6 @@ class Parser:
         return node
 
     def parse_and(self):
-        # Parse logical AND expressions
         node = self.parse_not()
         while self.current_token.type == 'AND':
             op = self.current_token
@@ -67,7 +99,6 @@ class Parser:
         return node
 
     def parse_not(self):
-        # Parse logical NOT unary operator
         if self.current_token.type == 'NOT':
             op = self.current_token
             self.eat('NOT')
@@ -75,7 +106,6 @@ class Parser:
         return self.parse_comparison()
 
     def parse_comparison(self):
-        # Parse comparison operators (==, !=, <, <=, >, >=)
         node = self.parse_arith()
         if self.current_token.type in ('EQ', 'NE', 'LT', 'LTE', 'GT', 'GTE'):
             op = self.current_token
@@ -84,7 +114,6 @@ class Parser:
         return node
 
     def parse_arith(self):
-        # Parse addition and subtraction, including string concatenation with '+'
         node = self.parse_term()
         while self.current_token.type in ('PLUS', 'MINUS'):
             op = self.current_token
@@ -93,7 +122,6 @@ class Parser:
         return node
 
     def parse_term(self):
-        # Parse multiplication and division
         node = self.parse_factor()
         while self.current_token.type in ('MUL', 'DIV'):
             op = self.current_token
@@ -104,27 +132,27 @@ class Parser:
     def parse_factor(self):
         token = self.current_token
 
-        # Unary + or -
         if token.type in ('PLUS', 'MINUS'):
             self.eat(token.type)
             return UnaryOp(token, self.parse_factor())
 
-        # Number literals
         if token.type in ('INT', 'FLOAT'):
             self.eat(token.type)
             return Num(token)
 
-        # Boolean literals
         if token.type == 'BOOLEAN':
             self.eat('BOOLEAN')
             return Bool(token)
 
-        # String literals (Stage 3)
         if token.type == 'STRING':
             self.eat('STRING')
             return String(token)
 
-        # Parenthesized expressions
+        if token.type == 'IDENTIFIER':
+            var_name = token.value
+            self.eat('IDENTIFIER')
+            return VarAccess(var_name)
+
         if token.type == 'LPAREN':
             self.eat('LPAREN')
             node = self.parse_or()

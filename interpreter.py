@@ -1,13 +1,13 @@
-# interpreter.py
-
 from lexer import Lexer
 from my_parser import Parser
-from my_parser import Num, Bool, BinOp, UnaryOp, String
+from my_parser import Num, Bool, BinOp, UnaryOp, String, VarAssign, VarAccess, PrintStmt
 from lexer import TT_PLUS, TT_MINUS, TT_MUL, TT_DIV, TT_EQ, TT_NE, TT_LT, TT_LTE, TT_GT, TT_GTE, TT_AND, TT_OR, TT_NOT
 
 class Interpreter:
+    def __init__(self):
+        self.global_vars = {}
+
     def visit(self, node):
-        # Dispatch method based on node class name, e.g. visit_Num, visit_BinOp
         method_name = 'visit_' + type(node).__name__
         visitor = getattr(self, method_name, None)
         if visitor is None:
@@ -21,8 +21,23 @@ class Interpreter:
         return node.value
 
     def visit_String(self, node):
-        # Return the string literal's value
         return node.value
+
+    def visit_VarAccess(self, node):
+        name = node.name
+        if name not in self.global_vars:
+            raise Exception(f"Variable '{name}' is not defined")
+        return self.global_vars[name]
+
+    def visit_VarAssign(self, node):
+        value = self.visit(node.value)
+        self.global_vars[node.name] = value
+        return value        
+
+    def visit_PrintStmt(self, node):
+        value = self.visit(node.expr)
+        print(value)        # print output directly
+        return None        # explicitly return None to avoid carry-over
 
     def visit_BinOp(self, node):
         left = self.visit(node.left)
@@ -30,7 +45,6 @@ class Interpreter:
         op_type = node.op.type
 
         if op_type == TT_PLUS:
-            # If either operand is string, convert both to string and concatenate
             if isinstance(left, str) or isinstance(right, str):
                 return str(left) + str(right)
             return left + right
@@ -74,9 +88,18 @@ class Interpreter:
         else:
             raise Exception(f"Unknown unary operator {op_type}")
 
+    def interpret(self, statements):
+        result = None
+        for stmt in statements:
+            val = self.visit(stmt)
+            if val  is not None:
+                result = val
+            return result
+            
+
 if __name__ == '__main__':
     interpreter = Interpreter()
-    print("Stage 3 Interpreter \nType 'exit' or 'quit' to leave.")
+    print("Stage 4 Interpreter - supports variables and print")
     while True:
         try:
             text = input('> ').strip()
@@ -87,8 +110,7 @@ if __name__ == '__main__':
                 continue
             lexer = Lexer(text)
             parser = Parser(lexer)
-            ast = parser.parse()
-            result = interpreter.visit(ast)
-            print(result)
+            statements = parser.parse()
+            interpreter.interpret(statements)
         except Exception as e:
             print(f"Error: {e}")

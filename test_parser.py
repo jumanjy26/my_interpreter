@@ -26,5 +26,22 @@ def test_parser():
         print('Parsed AST:', ast)
         print('---')
 
+def test_parser_stage4():
+    test_cases = [
+        "x = 5 + 3;",
+        "y = \"hello\" + \" world\";",
+        "print x;",
+        "print y;",
+        "z = x * 2;",
+        "print z;"
+    ]
+    for expr in test_cases:
+        lexer = Lexer(expr)
+        parser = Parser(lexer)
+        ast = parser.parse()
+        print(f'Expression: {expr}')
+        print('Parsed AST:', ast)
+        print('---')
+
 if __name__ == '__main__':
-    test_parser()
+    test_parser_stage4()
