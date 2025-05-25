@@ -92,19 +92,20 @@ class Interpreter:
         result = None
         for stmt in statements:
             val = self.visit(stmt)
-            if val  is not None:
+            if val is not None:
                 result = val
-            return result
-            
+        if result is not None:
+            print(result)   # Print the last expression result if not None
+        return result
 
 if __name__ == '__main__':
     interpreter = Interpreter()
-    print("Stage 4 Interpreter - supports variables and print")
+    print("Stage 4 Interpreter - supports variables and print\n---Type exit or quit to leave---\n")
     while True:
         try:
             text = input('> ').strip()
             if text.lower() in ('exit', 'quit'):
-                print("\nGoodbye!")
+                print("\n---Goodbye!---\n ")
                 break
             if not text:
                 continue
