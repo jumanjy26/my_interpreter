@@ -1,17 +1,19 @@
-# test_parser.py
+# test_interpreter.py
 
 from lexer import Lexer
 from my_parser import Parser
+from interpreter import Interpreter
 
-def test_parser():
+def test_interpreter():
+    interpreter = Interpreter()
     test_cases = [
-        # Stage 2 tests: Booleans and arithmetic
+        # Stage 2 interpreter tests
         "true and false",
         "5 + 3 * 2",
         "(10 / 2) == 5",
         "not false or true",
 
-        # Stage 3 tests: String literals and concatenation
+        # Stage 3 interpreter tests with strings
         '"hello"',
         '"foo" + "bar"',
         '"repeat" * 3',
@@ -22,9 +24,10 @@ def test_parser():
         lexer = Lexer(expr)
         parser = Parser(lexer)
         ast = parser.parse()
+        result = interpreter.visit(ast)
         print(f'Expression: {expr}')
-        print('Parsed AST:', ast)
+        print('Result:', result)
         print('---')
 
 if __name__ == '__main__':
-    test_parser()
+    test_interpreter()
