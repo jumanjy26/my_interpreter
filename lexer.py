@@ -1,7 +1,7 @@
 # lexer.py
 # Handles lexical analysis: turning input text into tokens for the parser.
 
-# Token type constants
+# Token type(TT) constants
 TT_INT     = 'INT'
 TT_FLOAT   = 'FLOAT'
 TT_STRING  = 'STRING'
@@ -23,13 +23,13 @@ TT_GT      = 'GT'
 TT_GTE     = 'GTE'
 TT_IDENTIFIER = 'IDENTIFIER'
 TT_ASSIGN  = 'ASSIGN'
-TT_SEMI    = 'SEMI'
+TT_SEMI    = 'SEMI'   #semicolon
 TT_PRINT   = 'PRINT'
 TT_IF      = 'IF'
 TT_ELSE    = 'ELSE'
 TT_WHILE   = 'WHILE'
 TT_INPUT   = 'INPUT'
-TT_LBRACE  = 'LBRACE'
+TT_LBRACE  = 'LBRACE' #left curly bracket
 TT_RBRACE  = 'RBRACE'
 TT_EOF     = 'EOF'
 
@@ -54,7 +54,7 @@ class Token:
         self.type = type_
         self.value = value
 
-    def __repr__(self):
+    def __repr__(self):             #print tokens nicely for debugging
         if self.value is not None:
             return f'Token({self.type}, {self.value})'
         return f'Token({self.type})'

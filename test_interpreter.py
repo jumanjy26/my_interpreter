@@ -1,32 +1,46 @@
 from lexer import Lexer
 from my_parser import Parser
 from interpreter import Interpreter
+import pytest
+import builtins
+
+@pytest.fixture
+def interpreter():
+    return Interpreter()
+
+def run_source(source, interpreter):
+    lexer = Lexer(source)
+    parser = Parser(lexer)
+    ast = parser.parse()
+    result = None
+    for node in ast:
+        val = interpreter.visit(node)
+        if val is not None:
+            result = val
+    return result
 
 def test_stage_1_to_3(interpreter):
-    print("Testing Stage 1-3 features (arithmetic, booleans, strings)...")
     test_cases = [
-        "3 + 4",
-        "10 - 2 * 3",
-        "(5 + 6) * 2",
-        "true and false",
-        "not false or true",
-        '"hello" + " world"',
-        '"repeat" * 3',
-        '"foo" + 123',
+        ("3 + 4", 7),
+        ("10 - 2 * 3", 4),
+        ("(5 + 6) * 2", 22),
+        ("true and false", False),
+        ("not false or true", True),
+        ('"hello" + " world"', "hello world"),
+        ('"repeat" * 3', "repeatrepeatrepeat"),
+        ('"foo" + 123', None),  # Expect error (None) for mixed type addition
     ]
-    for expr in test_cases:
-        lexer = Lexer(expr)
-        parser = Parser(lexer)
-        ast = parser.parse()
-        # parser returns a list, interpret each node
-        for node in ast:
-            result = interpreter.visit(node)
-        print(f"Expression: {expr}")
-        print(f"Result: {result}")
-        print("---")
+
+    for expr, expected in test_cases:
+        if expected is None:
+            # Expect an exception
+            with pytest.raises(Exception):
+                run_source(expr, interpreter)
+        else:
+            result = run_source(expr, interpreter)
+            assert result == expected, f"Failed on expression: {expr}"
 
 def test_stage_4(interpreter):
-    print("Testing Stage 4 features (variables, assignment, print)...")
     program = """
     x = 10 + 5;
     y = "hello ";
@@ -36,19 +50,11 @@ def test_stage_4(interpreter):
     w = x * 2;
     print w;
     """
-    lexer = Lexer(program)
-    parser = Parser(lexer)
-    ast = parser.parse()
-    interpreter.interpret(ast)
+    run_source(program, interpreter)
 
-def test_stage_5(interpreter):
-    print("Testing Stage 5 features (control flow and input)...")
-
-    # Input simulation: override input() in interpreter temporarily
-    inputs = iter(["Alice"])  # simulate user input
-
-    original_input = __builtins__.input
-    __builtins__.input = lambda: next(inputs)
+def test_stage_5(interpreter, capsys, monkeypatch):
+    inputs = iter(["Alice"])
+    monkeypatch.setattr(builtins, 'input', lambda: next(inputs))
 
     program = """
     x = 2;
@@ -66,18 +72,13 @@ def test_stage_5(interpreter):
     print "Hello, " + name;
     """
 
-    try:
-        lexer = Lexer(program)
-        parser = Parser(lexer)
-        ast = parser.parse()
-        interpreter.interpret(ast)
-    finally:
-        __builtins__.input = original_input  # restore input
+    run_source(program, interpreter)
+    captured = capsys.readouterr()
+    assert "2" in captured.out
+    assert "1" in captured.out
+    assert "Blast off!" in captured.out
+    assert "Enter your name:" in captured.out
+    assert "Hello, Alice" in captured.out
 
 if __name__ == '__main__':
-    interpreter = Interpreter()
-    test_stage_1_to_3(interpreter)
-    print("\n")
-    test_stage_4(interpreter)
-    print("\n")
-    test_stage_5(interpreter)
+    pytest.main()
