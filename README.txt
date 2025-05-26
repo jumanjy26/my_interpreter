@@ -28,7 +28,11 @@ my_interpreter/
 │ ├── test_stage4.py # Variables and print tests
 │ └── test_stage5.py # Control flow and input tests
 ├── BUILD.txt
-└── README.md
+├── README.md
+├── manual_parser_test.py
+├── test_interpreter_manual.py
+├── test_interpreter_pytest.py
+└──test_parser.py
 
 ---------
 Features
@@ -74,7 +78,7 @@ pytest (install via pip install pytest)
 ------
 Notes
 ------
-Ensure src/__init__.py exists (can be empty) to mark src as a package.
+Please make sure src/__init__.py exists (can be empty) to mark src as a package.
 
 Tokens and keywords are defined in src/my_token.py.
 
@@ -85,9 +89,9 @@ Tests use pytest fixtures and mock input() for thorough coverage.
 ---------------
 Troubleshooting
 ---------------
-If import errors occur, verify you run commands from the project root and PYTHONPATH is set correctly.
+If import errors happen, please make sure you run commands from the project root and PYTHONPATH is set correctly.
 
-If tests hang, ensure no interactive input code runs outside the main guard block.
+If tests hang, please make sure no interactive input code runs outside the main guard block.
 
 --------
 Contact
