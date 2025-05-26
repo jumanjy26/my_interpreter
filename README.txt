@@ -44,7 +44,8 @@ Features
 
 1. Interactive interpreter:
 
-python src/interpreter.py
+python -m src.interpreter
+
 Enter your program statements or expressions interactively.
 
 Type exit or quit to leave the interpreter.

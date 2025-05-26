@@ -183,7 +183,7 @@ class Interpreter:
 if __name__ == '__main__':
     # Entry point for interactive interpreter session
     interpreter = Interpreter()
-    print("Stage 5 Interpreter - supports full language features\n")
+    print("Stage 1- 5 Interpreter - supports full language features\n")
 
     while True:
         try:
