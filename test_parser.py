@@ -1,4 +1,5 @@
 # test_parser.py
+#Automated batch tests for a fixed set of expressions
 
 from lexer import Lexer
 from my_parser import Parser
