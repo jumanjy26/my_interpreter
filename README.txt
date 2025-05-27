@@ -73,7 +73,7 @@ pytest (install via pip install pytest)
 ------
 Notes
 ------
-Ensure src/__init__.py exists (can be empty) to mark src as a package.
+Please make sure src/__init__.py exists (can be empty) to mark src as a package.
 
 Tokens and keywords are defined in src/my_token.py.
 
@@ -84,9 +84,9 @@ Tests use pytest fixtures and mock input() for thorough coverage.
 ---------------
 Troubleshooting
 ---------------
-If import errors occur, verify you run commands from the project root and PYTHONPATH is set correctly.
+If import errors happen, please make sure you run commands from the project root and PYTHONPATH is set correctly.
 
-If tests hang, ensure no interactive input code runs outside the main guard block.
+If tests hang, please make sure no interactive input code runs outside the main guard block.
 
 --------
 Contact
