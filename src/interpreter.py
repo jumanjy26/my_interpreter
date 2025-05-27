@@ -1,11 +1,11 @@
-from lexer import Lexer
-from my_parser import Parser
-from my_parser import (
+from src.lexer import Lexer
+from src.my_parser import Parser
+from src.my_parser import (
     Num, Bool, BinOp, UnaryOp, String,
     VarAssign, VarAccess, PrintStmt,
     IfStmt, WhileStmt, InputExpr
 )
-from token import (
+from src.my_token import (
     TT_PLUS, TT_MINUS, TT_MUL, TT_DIV,
     TT_EQ, TT_NE, TT_LT, TT_LTE,
     TT_GT, TT_GTE, TT_AND, TT_OR, TT_NOT

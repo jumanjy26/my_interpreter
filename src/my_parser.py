@@ -1,7 +1,7 @@
 # my_parser.py
 # Recursive descent parser: converts tokens into AST nodes representing the program structure.
 
-from lexer import Lexer
+from src.lexer import Lexer
 
 # === AST Node Classes ===
 # Each class represents a different type of syntax node in the language.
@@ -313,7 +313,7 @@ class Parser:
 
 # Quick interactive test when running this file directly
 if __name__ == '__main__':
-    from lexer import Lexer
+    from src.lexer import Lexer
     while True:
         try:
             text = input("Enter expression or statement (or 'exit' to quit): ")

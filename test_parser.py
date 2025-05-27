@@ -3,8 +3,8 @@
 # This script lexes and parses multiple sample expressions,
 # then prints their Abstract Syntax Tree (AST) for manual verification.
 
-from lexer import Lexer
-from my_parser import Parser
+from src.lexer import Lexer
+from src.my_parser import Parser
 
 def test_parser():
     """

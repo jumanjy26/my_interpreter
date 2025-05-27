@@ -1,6 +1,6 @@
-from lexer import Lexer
-from my_parser import Parser
-from interpreter import Interpreter
+from src.lexer import Lexer
+from src.my_parser import Parser
+from src.interpreter import Interpreter
 import pytest
 import builtins
 

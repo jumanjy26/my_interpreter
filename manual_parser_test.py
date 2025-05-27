@@ -1,5 +1,5 @@
-from lexer import Lexer
-from my_parser import Parser
+from src.lexer import Lexer
+from src.my_parser import Parser
 
 def manual_parser_test():
     test_cases = [
