@@ -2,7 +2,7 @@
 # Performs lexical analysis: converts input source code text into a stream of tokens.
 # Tokens are the basic building blocks (numbers, keywords, operators) for the parser.
 
-from my_token import (
+from src.my_token import (
     TT_INT, TT_FLOAT, TT_STRING,
     TT_PLUS, TT_MINUS, TT_MUL, TT_DIV,
     TT_LPAREN, TT_RPAREN,

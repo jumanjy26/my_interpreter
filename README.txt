@@ -1,31 +1,42 @@
-README
+Project: Simple Language Interpreter in Python
+---------------------------------------------
 
-Project: Simple Interpreter for a Custom Language (Stages 1-5)
+Overview:
+---------
+This project implements an interpreter for a simple programming language featuring:
+- Arithmetic expressions (+, -, *, /)
+- Boolean logic and comparisons
+- String literals and operations
+- Variables with assignment and access
+- Control flow constructs: if-else, while loops
+- Input and output (print, input())
 
-1. Overview:
-   This project implements a simple interpreter that supports:
-   - Stage 1: Arithmetic expressions (+, -, *, /)
-   - Stage 2: Boolean logic (and, or, not) and comparisons
-   - Stage 3: String literals and operations (+ concatenation, * repetition)
-   - Stage 4: Variables, assignments, and print statements
-   - Stage 5: Control flow constructs (if-else, while loops) and input()
+Project Structure:
+------------------
+- src/
+  Contains all source code files:
+  - lexer.py         : Lexical analyzer turning source code into tokens
+  - my_token.py      : Token type constants and keywords definitions
+  - my_parser.py     : Recursive descent parser generating AST nodes
+  - interpreter.py   : AST visitor that executes the program
+  - __init__.py      : Marks src as a Python package
 
-2. How to use:
-   - Run the interpreter interactively with:
-     python interpreter.py
-   - Input code statements or expressions.
-   - Use a blank line to execute entered multi-line code.
-   - Type 'exit' or 'quit' to end the session.
+- tests/
+  Automated test files split by language feature stage:
+  - test_stage1.py   : Arithmetic expression tests
+  - test_stage2.py   : Boolean logic and comparisons tests
+  - test_stage3.py   : String operations tests
+  - test_stage4.py   : Variables and print tests
+  - test_stage5.py   : Control flow and input tests
 
-3. Testing:
-   - Automated testing is done with pytest. Run:
-     pytest test_interpreter_pytest.py
-   - Manual parser and interpreter tests can be run for demonstration.
+Features:
+---------
+- Modular design separating tokens, lexer, parser, and interpreter.
+- Clear AST node classes with visitor pattern for interpretation.
+- Automated tests using pytest for thorough correctness checking.
+- Interactive interpreter mode for user input and code evaluation.
 
-4. Example source files:
-   - Five example programs (example1.txt ... example5.txt) demonstrate valid language syntax and features.
-
-5. Notes:
-   - The interpreter performs lexical analysis, parsing, and interpretation.
-   - Errors such as undefined variables or type errors are reported during execution.
-
+How to Run:
+-----------
+1. Interactive interpreter:
+python src/interpreter.py

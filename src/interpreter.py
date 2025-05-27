@@ -185,19 +185,19 @@ if __name__ == '__main__':
     interpreter = Interpreter()
     print("Stage 5 Interpreter - supports full language features\n")
 
-while True:
-    try:
-        text = input('> ').strip()
-        if text.lower() in ('exit', 'quit'):
-            print("\n---Goodbye!---\n")
-            break
-        if not text:
-            continue
+    while True:
+        try:
+            text = input('> ').strip()
+            if text.lower() in ('exit', 'quit'):
+                print("\n---Goodbye!---\n")
+                break
+            if not text:
+                continue
 
-        lexer = Lexer(text)
-        parser = Parser(lexer)
-        statements = parser.parse()
-        interpreter.interpret(statements)
+            lexer = Lexer(text)
+            parser = Parser(lexer)
+            statements = parser.parse()
+            interpreter.interpret(statements)
 
-    except Exception as e:
-        print(f"Error: {e}")
+        except Exception as e:
+            print(f"Error: {e}")

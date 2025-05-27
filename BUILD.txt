@@ -1,37 +1,48 @@
-BUILD INSTRUCTIONS
+Project Build and Run Instructions
+----------------------------------
 
-1. Environment:
-   - Python 3.8 or higher must be installed on the virtual machine.
-   - No external libraries required; uses only standard Python libraries.
+1. Project Structure:
+   - src/           # Source code files (lexer.py, interpreter.py, my_parser.py, my_token.py, __init__.py)
+   - tests/         # Automated test files organized by stage (test_stage1.py ... test_stage5.py)
+   - BUILD.txt      # This build instruction file
+   - README.txt     # Project documentation and usage guide
 
-2. Files:
-   - lexer.py          (Lexical analyzer)
-   - my_parser.py      (Recursive descent parser)
-   - interpreter.py    (Interpreter executing the AST)
-   - test_interpreter_pytest.py  (Automated tests using pytest)
-   - manual_parser_test.py        (Manual parser test)
-   - test_parser.py              (Additional parser tests)
-   - test_interpreter_manual.py  (Manual interpreter tests)
+2. Prerequisites:
+   - Python 3.7 or higher installed.
+   - pytest installed for running automated tests.
 
-3. Running the Interpreter:
-   - To run the interactive interpreter:
-     python interpreter.py
-   - Type your code in the prompt.
-   - Press Enter on a blank line to run multi-line input.
-   - Type 'exit' or 'quit' to exit the interpreter.
+3. Setting up the environment:
+   - (Optional) Create and activate a virtual environment:
+       python -m venv venv
+       venv\Scripts\activate     # Windows
+       source venv/bin/activate  # Linux/macOS
 
-4. Running Automated Tests:
-   - Ensure pytest is installed: pip install pytest
-   - Run automated tests using:
-     pytest test_interpreter_pytest.py
+   - Install pytest:
+       pip install pytest
 
-5. Running Manual Tests:
-   - To run manual parser tests:
-     python manual_parser_test.py
-   - To run manual interpreter tests:
-     python test_interpreter_manual.py
+4. Running the Interpreter interactively:
+   - From the project root, run:
+       python src/interpreter.py
+   - You can enter code expressions or statements interactively.
+   - Type 'exit' or 'quit' to leave the interpreter.
+
+5. Running automated tests:
+   - Ensure you are in the project root directory.
+   - Set PYTHONPATH to current directory so Python can find `src` package:
+       Windows PowerShell:
+         $env:PYTHONPATH = "."
+       Command Prompt:
+         set PYTHONPATH=.
+   - Run pytest on tests folder:
+       pytest tests/
+   - To run individual stage tests:
+       pytest tests/test_stage1.py
 
 6. Notes:
-   - All source files must be in the same directory when running.
-   - No compilation step is needed since this is Python code.
+   - Tokens and keywords are defined in `src/my_token.py`.
+   - The project uses recursive descent parsing with AST node classes.
+   - The interpreter supports arithmetic, boolean logic, strings, variables, control flow, and input/output.
 
+7. Troubleshooting:
+   - If import errors occur, check that `src/__init__.py` exists and PYTHONPATH is set correctly.
+   - If tests hang, ensure the interactive loop is inside `if __name__ == '__main__':` block in `interpreter.py`.
