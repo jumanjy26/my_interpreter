@@ -4,7 +4,7 @@
 from lexer import Lexer
 
 # === AST Node Classes ===
-# Each class corresponds to a kind of syntax node in your language.
+# Each class represents a different type of syntax node in the language.
 
 class Num:
     def __init__(self, token):
@@ -22,7 +22,8 @@ class String:
     def __init__(self, token):
         self.value = token.value  # String literal value
     def __repr__(self):
-        return f"String({repr(self.value)})"  # repr for readable quotes and escapes
+        # Use repr() to show string quotes and escape sequences
+        return f"String({repr(self.value)})"
 
 class BinOp:
     def __init__(self, left, op, right):
@@ -42,13 +43,13 @@ class UnaryOp:
 class VarAssign:
     def __init__(self, name, value):
         self.name = name          # Variable name (string)
-        self.value = value        # Expression node assigned
+        self.value = value        # Expression node assigned to the variable
     def __repr__(self):
         return f"VarAssign({self.name}, {self.value})"
 
 class VarAccess:
     def __init__(self, name):
-        self.name = name          # Variable name accessed
+        self.name = name          # Variable name being accessed
     def __repr__(self):
         return f"VarAccess({self.name})"
 
@@ -60,8 +61,8 @@ class PrintStmt:
 
 class IfStmt:
     def __init__(self, condition, true_block, false_block=None):
-        self.condition = condition      # Condition expression
-        self.true_block = true_block    # List of statements if True
+        self.condition = condition      # Condition expression node
+        self.true_block = true_block    # List of statements if condition is True
         self.false_block = false_block  # List of statements if False (optional)
     def __repr__(self):
         if self.false_block:
@@ -71,33 +72,37 @@ class IfStmt:
 
 class WhileStmt:
     def __init__(self, condition, body):
-        self.condition = condition  # Loop condition expression
-        self.body = body            # List of statements inside loop
+        self.condition = condition  # Condition expression node for loop
+        self.body = body            # List of statements inside the while loop
     def __repr__(self):
         return f"WhileStmt({self.condition}, {self.body})"
 
 class InputExpr:
     def __init__(self):
-        pass                      # Represents input() call with no args
+        pass                      # Represents a call to input() with no arguments
     def __repr__(self):
         return "InputExpr()"
 
 # === Parser Class ===
-# Implements recursive descent parsing with operator precedence
+# Implements recursive descent parsing for the language grammar.
 
 class Parser:
     def __init__(self, lexer: Lexer):
         self.lexer = lexer
-        self.current_token = self.lexer.get_next_token()  # Initialize first token
+        self.current_token = self.lexer.get_next_token()  # Get first token
 
     def error(self, msg='Invalid syntax'):
+        """
+        Raise an exception with a descriptive error message including
+        the current token type and value.
+        """
         token = self.current_token
         raise Exception(f"{msg} at token {token.type} with value '{token.value}'")
 
     def eat(self, token_type: str):
         """
-        Consume current token if it matches token_type.
-        Otherwise raise syntax error.
+        Consume the current token if it matches the expected type.
+        Otherwise, raise a syntax error.
         """
         if self.current_token.type == token_type:
             self.current_token = self.lexer.get_next_token()
@@ -106,8 +111,8 @@ class Parser:
 
     def parse(self):
         """
-        Parse multiple statements until EOF.
-        Returns a list of AST statement nodes.
+        Parse a sequence of statements until EOF.
+        Returns a list of AST nodes representing the statements.
         """
         statements = []
         while self.current_token.type != 'EOF':
@@ -117,26 +122,25 @@ class Parser:
 
     def parse_block(self):
         """
-        Parse a block of statements inside braces { ... }.
-        Returns a list of statement nodes inside the block.
+        Parse a block of statements enclosed in braces { ... }.
+        Returns a list of statement AST nodes inside the block.
         """
-        self.eat('LBRACE')  # Consume '{'
+        self.eat('LBRACE')  # Expect '{' to start block
         statements = []
 
-        # Loop until matching '}' or EOF (avoid infinite loop)
+        # Continue parsing statements until closing brace or EOF
         while self.current_token.type != 'RBRACE' and self.current_token.type != 'EOF':
             statements.append(self.parse_statement())
 
-        self.eat('RBRACE')  # Consume '}'
+        self.eat('RBRACE')  # Expect '}' to close block
         return statements
 
     def parse_statement(self):
         """
         Parse a single statement.
-        Supports print, if, while, input, variable assignment, or expression.
+        Supports print, if, while, input, variable assignment/access,
+        or falls back to parsing an expression.
         """
-
-        # Print statement: print expr;
         if self.current_token.type == 'PRINT':
             self.eat('PRINT')
             expr = self.parse_or()
@@ -144,7 +148,6 @@ class Parser:
                 self.eat('SEMI')
             return PrintStmt(expr)
 
-        # If statement: if (condition) { true_block } [ else { false_block } ]
         elif self.current_token.type == 'IF':
             self.eat('IF')
             self.eat('LPAREN')
@@ -157,7 +160,6 @@ class Parser:
                 false_block = self.parse_block()
             return IfStmt(condition, true_block, false_block)
 
-        # While loop: while (condition) { body }
         elif self.current_token.type == 'WHILE':
             self.eat('WHILE')
             self.eat('LPAREN')
@@ -166,14 +168,12 @@ class Parser:
             body = self.parse_block()
             return WhileStmt(condition, body)
 
-        # input(): input()
         elif self.current_token.type == 'INPUT':
             self.eat('INPUT')
             self.eat('LPAREN')
             self.eat('RPAREN')
             return InputExpr()
 
-        # Variable assignment or access: var = expr; or var
         elif self.current_token.type == 'IDENTIFIER':
             var_name = self.current_token.value
             self.eat('IDENTIFIER')
@@ -186,19 +186,18 @@ class Parser:
             else:
                 return VarAccess(var_name)
 
-        # Otherwise parse as an expression (with optional trailing semicolon)
         else:
             expr = self.parse_or()
             if self.current_token.type == 'SEMI':
                 self.eat('SEMI')
             return expr
 
-    # === Expression Parsing by Precedence ===
+    # === Expression parsing follows operator precedence ===
 
     def parse_or(self):
         """
-        Parse OR expressions (lowest precedence for boolean ops).
-        or_expr -> and_expr ('OR' and_expr)*
+        Parse logical OR expressions.
+        Grammar: or_expr -> and_expr ('OR' and_expr)*
         """
         node = self.parse_and()
         while self.current_token.type == 'OR':
@@ -209,8 +208,8 @@ class Parser:
 
     def parse_and(self):
         """
-        Parse AND expressions.
-        and_expr -> not_expr ('AND' not_expr)*
+        Parse logical AND expressions.
+        Grammar: and_expr -> not_expr ('AND' not_expr)*
         """
         node = self.parse_not()
         while self.current_token.type == 'AND':
@@ -221,8 +220,8 @@ class Parser:
 
     def parse_not(self):
         """
-        Parse unary NOT or fall back to comparisons.
-        not_expr -> 'NOT' not_expr | comparison
+        Parse unary NOT expressions or fallback to comparison parsing.
+        Grammar: not_expr -> 'NOT' not_expr | comparison
         """
         if self.current_token.type == 'NOT':
             op = self.current_token
@@ -233,7 +232,7 @@ class Parser:
     def parse_comparison(self):
         """
         Parse comparison expressions.
-        comparison -> arith_expr (('EQ'|'NE'|'LT'|'LTE'|'GT'|'GTE') arith_expr)?
+        Grammar: comparison -> arith_expr (('EQ'|'NE'|'LT'|'LTE'|'GT'|'GTE') arith_expr)?
         """
         node = self.parse_arith()
         if self.current_token.type in ('EQ', 'NE', 'LT', 'LTE', 'GT', 'GTE'):
@@ -245,7 +244,7 @@ class Parser:
     def parse_arith(self):
         """
         Parse addition and subtraction.
-        arith_expr -> term (('PLUS'|'MINUS') term)*
+        Grammar: arith_expr -> term (('PLUS'|'MINUS') term)*
         """
         node = self.parse_term()
         while self.current_token.type in ('PLUS', 'MINUS'):
@@ -257,7 +256,7 @@ class Parser:
     def parse_term(self):
         """
         Parse multiplication and division.
-        term -> factor (('MUL'|'DIV') factor)*
+        Grammar: term -> factor (('MUL'|'DIV') factor)*
         """
         node = self.parse_factor()
         while self.current_token.type in ('MUL', 'DIV'):
@@ -268,42 +267,43 @@ class Parser:
 
     def parse_factor(self):
         """
-        Parse unary operators and primary expressions:
-        factor -> ('PLUS'|'MINUS') factor
-                | 'INT' | 'FLOAT' | 'BOOLEAN' | 'STRING' | 'INPUT'
-                | 'IDENTIFIER'
-                | '(' or_expr ')'
+        Parse unary operators and primary expressions.
+        Grammar:
+            factor -> ('PLUS' | 'MINUS') factor
+                    | 'INT' | 'FLOAT' | 'BOOLEAN' | 'STRING' | 'INPUT'
+                    | 'IDENTIFIER'
+                    | '(' or_expr ')'
         """
         token = self.current_token
 
-        if token.type in ('PLUS', 'MINUS'):  # Unary plus or minus
+        if token.type in ('PLUS', 'MINUS'):
             self.eat(token.type)
             return UnaryOp(token, self.parse_factor())
 
-        if token.type in ('INT', 'FLOAT'):  # Numeric literals
+        if token.type in ('INT', 'FLOAT'):
             self.eat(token.type)
             return Num(token)
 
-        if token.type == 'BOOLEAN':  # Boolean literals
+        if token.type == 'BOOLEAN':
             self.eat('BOOLEAN')
             return Bool(token)
 
-        if token.type == 'STRING':  # String literals
+        if token.type == 'STRING':
             self.eat('STRING')
             return String(token)
 
-        if token.type == 'INPUT':  # input() call
+        if token.type == 'INPUT':
             self.eat('INPUT')
             self.eat('LPAREN')
             self.eat('RPAREN')
             return InputExpr()
 
-        if token.type == 'IDENTIFIER':  # Variable access
+        if token.type == 'IDENTIFIER':
             var_name = token.value
             self.eat('IDENTIFIER')
             return VarAccess(var_name)
 
-        if token.type == 'LPAREN':  # Parenthesized expression
+        if token.type == 'LPAREN':
             self.eat('LPAREN')
             node = self.parse_or()
             self.eat('RPAREN')
