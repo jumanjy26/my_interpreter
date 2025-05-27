@@ -5,7 +5,7 @@ from my_parser import (
     VarAssign, VarAccess, PrintStmt,
     IfStmt, WhileStmt, InputExpr
 )
-from lexer import (
+from token import (
     TT_PLUS, TT_MINUS, TT_MUL, TT_DIV,
     TT_EQ, TT_NE, TT_LT, TT_LTE,
     TT_GT, TT_GTE, TT_AND, TT_OR, TT_NOT

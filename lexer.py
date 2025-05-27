@@ -2,54 +2,19 @@
 # Performs lexical analysis: converts input source code text into a stream of tokens.
 # Tokens are the basic building blocks (numbers, keywords, operators) for the parser.
 
-# --- Token type (TT) constants ---
-# Define all token types that the lexer can produce.
-TT_INT     = 'INT'         # Integer literal, e.g., 42
-TT_FLOAT   = 'FLOAT'       # Floating-point literal, e.g., 3.14
-TT_STRING  = 'STRING'      # String literal enclosed in double quotes
-TT_PLUS    = 'PLUS'        # '+' operator
-TT_MINUS   = 'MINUS'       # '-' operator
-TT_MUL     = 'MUL'         # '*' operator
-TT_DIV     = 'DIV'         # '/' operator
-TT_LPAREN  = 'LPAREN'      # '(' left parenthesis
-TT_RPAREN  = 'RPAREN'      # ')' right parenthesis
-TT_BOOLEAN = 'BOOLEAN'     # Boolean literal: true or false
-TT_AND     = 'AND'         # Logical AND keyword 'and'
-TT_OR      = 'OR'          # Logical OR keyword 'or'
-TT_NOT     = 'NOT'         # Logical NOT keyword 'not'
-TT_EQ      = 'EQ'          # Equality operator '=='
-TT_NE      = 'NE'          # Not-equal operator '!='
-TT_LT      = 'LT'          # Less than operator '<'
-TT_LTE     = 'LTE'         # Less than or equal '<='
-TT_GT      = 'GT'          # Greater than operator '>'
-TT_GTE     = 'GTE'         # Greater than or equal '>='
-TT_IDENTIFIER = 'IDENTIFIER'  # Variable/function names
-TT_ASSIGN  = 'ASSIGN'      # Assignment operator '='
-TT_SEMI    = 'SEMI'        # Semicolon ';' statement terminator
-TT_PRINT   = 'PRINT'       # 'print' keyword
-TT_IF      = 'IF'          # 'if' keyword
-TT_ELSE    = 'ELSE'        # 'else' keyword
-TT_WHILE   = 'WHILE'       # 'while' keyword
-TT_INPUT   = 'INPUT'       # 'input' keyword
-TT_LBRACE  = 'LBRACE'      # Left curly brace '{' block start
-TT_RBRACE  = 'RBRACE'      # Right curly brace '}' block end
-TT_EOF     = 'EOF'         # End-of-file/input token
-
-# Mapping reserved words to their token types
-KEYWORDS = {
-    'true': TT_BOOLEAN,
-    'false': TT_BOOLEAN,
-    'and': TT_AND,
-    'or': TT_OR,
-    'not': TT_NOT,
-    'print': TT_PRINT,
-    'if': TT_IF,
-    'else': TT_ELSE,
-    'while': TT_WHILE,
-    'input': TT_INPUT,
-}
-
-DIGITS = '0123456789'  # Allowed digits for numbers
+from token import (
+    TT_INT, TT_FLOAT, TT_STRING,
+    TT_PLUS, TT_MINUS, TT_MUL, TT_DIV,
+    TT_LPAREN, TT_RPAREN,
+    TT_BOOLEAN, TT_AND, TT_OR, TT_NOT,
+    TT_EQ, TT_NE, TT_LT, TT_LTE, TT_GT, TT_GTE,
+    TT_IDENTIFIER, TT_ASSIGN, TT_SEMI,
+    TT_PRINT, TT_IF, TT_ELSE, TT_WHILE, TT_INPUT,
+    TT_LBRACE, TT_RBRACE,
+    TT_EOF,
+    KEYWORDS,
+    DIGITS,
+)
 
 class Token:
     """
