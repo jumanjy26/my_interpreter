@@ -1,0 +1,37 @@
+BUILD INSTRUCTIONS
+
+1. Environment:
+   - Python 3.8 or higher must be installed on the virtual machine.
+   - No external libraries required; uses only standard Python libraries.
+
+2. Files:
+   - lexer.py          (Lexical analyzer)
+   - my_parser.py      (Recursive descent parser)
+   - interpreter.py    (Interpreter executing the AST)
+   - test_interpreter_pytest.py  (Automated tests using pytest)
+   - manual_parser_test.py        (Manual parser test)
+   - test_parser.py              (Additional parser tests)
+   - test_interpreter_manual.py  (Manual interpreter tests)
+
+3. Running the Interpreter:
+   - To run the interactive interpreter:
+     python interpreter.py
+   - Type your code in the prompt.
+   - Press Enter on a blank line to run multi-line input.
+   - Type 'exit' or 'quit' to exit the interpreter.
+
+4. Running Automated Tests:
+   - Ensure pytest is installed: pip install pytest
+   - Run automated tests using:
+     pytest test_interpreter_pytest.py
+
+5. Running Manual Tests:
+   - To run manual parser tests:
+     python manual_parser_test.py
+   - To run manual interpreter tests:
+     python test_interpreter_manual.py
+
+6. Notes:
+   - All source files must be in the same directory when running.
+   - No compilation step is needed since this is Python code.
+
