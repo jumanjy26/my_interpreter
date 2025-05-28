@@ -28,7 +28,11 @@ my_interpreter/
 │ ├── test_stage4.py # Variables and print tests
 │ └── test_stage5.py # Control flow and input tests
 ├── BUILD.txt
-└── README.md
+├── README.md
+├── manual_parser_test.py
+├── test_interpreter_manual.py
+├── test_interpreter_pytest.py
+└──test_parser.py
 
 ---------
 Features
